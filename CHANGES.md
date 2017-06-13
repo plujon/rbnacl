@@ -1,4 +1,4 @@
-## 4.0.2 (2016-03-12)
+## 4.0.2 (2017-03-12)
 
 * [#157](https://github.com/cryptosphere/rbnacl/pull/157)
   Raise error on degenerate keys (fixes #152).
