@@ -38,6 +38,10 @@ module RbNaCl
                          :crypto_sign_ed25519_seed_keypair,
                          [:pointer, :pointer, :pointer]
 
+        sodium_function  :sign_ed25519_sk_to_seed,
+                         :crypto_sign_ed25519_sk_to_seed,
+                         [:pointer, :pointer]
+
         attr_reader :verify_key
 
         # Generate a random SigningKey
@@ -45,6 +49,27 @@ module RbNaCl
         # @return [RbNaCl::SigningKey] Freshly-generated random SigningKey
         def self.generate
           new RbNaCl::Random.random_bytes(Ed25519::SEEDBYTES)
+        end
+
+        # Use a secret key to create a SigningKey
+        #
+        # The normal SigningKey constructor takes a 32-byte seed
+        # value.  The original seed value can be extracted from a
+        # 64-byte secret key.
+        #
+        # @param secret_key [String] The secret key, 64 bytes long.
+        #
+        # @return [RbNaCl::SigningKey] Ready for use
+        def self.from_secret_key(secret_key)
+          secret_key = secret_key.to_s
+
+          Util.check_length(secret_key, Ed25519::SIGNINGKEYBYTES, "secret key")
+
+          seed = Util.zeros(Ed25519::SEEDBYTES)
+
+          sign_ed25519_sk_to_seed(seed, secret_key) || raise(CryptoError, "Failed to extract seed from secret key")
+
+          new seed
         end
 
         # Create a SigningKey from a seed value
